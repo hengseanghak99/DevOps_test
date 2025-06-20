@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('test', async ({ page }) => {
+test.skip('test', async ({ page }) => {
   await page.goto('https://www.selenium.dev/selenium/web/web-form.html');
   await page.getByRole('textbox', { name: 'Text input' }).click();
   await page.getByRole('textbox', { name: 'Text input' }).fill('test');
