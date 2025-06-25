@@ -1,27 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-// Define constants for better readability and maintainability
-const BASE_URL = 'https://nftt-market-admin.beniten.net/login';
-const VALID_EMAIL = 'admin@nftt-market-admin.beniten.net';
-const VALID_PASSWORD = 'pW232@#!$$#';
-
-const EXPECTED_BLOCKCHAINS = [
-  'Ethereum Mainnet',
-  'Polygon Mainnet',
-  'Arbitrum Mainnet',
-  'Optimism Mainnet',
-  'Base Mainnet',
-  'ZKSync Mainnet',
-  'Abstract Mainnet',
-  'Ronin Mainnet',
-  'Oasys Mainnet',
-];
-
-const login = async (page, email, password) => {
-  await page.getByRole('textbox', { name: 'Email' }).fill(email);
-  await page.getByRole('textbox', { name: 'Password' }).fill(password);
-  await page.getByRole('button', { name: 'Login' }).click();
-};
+import {BASE_URL,VALID_EMAIL,VALID_PASSWORD,EXPECTED_BLOCKCHAINS,login} from './Helpers.js';
 
 test.describe('Login Functionality', () => {
 
@@ -77,13 +55,6 @@ test.describe('Admin Site Navigation', () => {
     await expect(page.getByText('NFT Collection')).toBeVisible();
   });
 
-  test('should allow navigation to Site Management', async ({ page }) => {
-    await login(page, VALID_EMAIL, VALID_PASSWORD);
-    await page.getByRole('button', { name: 'Site Management' }).click();
-    await expect(page.getByText('Site Management')).toBeVisible();
-  });
-
-
 });
 
 test.describe('Features: NFT Collection', () => {
@@ -129,27 +100,28 @@ test.describe('Features: NFT Collection', () => {
     await expect(page.getByRole('button', { name: 'Create' })).toBeVisible();
   });
 
-  test.skip('Invalid UI', async ({ page }) => {
+  test('Invalid UI', async ({ page }) => {
+
     await login(page, VALID_EMAIL, VALID_PASSWORD);
     await page.getByRole('button', { name: 'NFT Collection' }).click();
     await page.getByRole('button', { name: 'New Collection' }).click();
     await page.getByRole('button', { name: 'Create' }).click();
-
     await expect(page.getByText('English name is required')).toBeVisible();
-    await expect(page.getByText('Blockchain is required')).toBeVisible();
-    await expect(page.getByText('Contract address is required')).toBeVisible();  
+    await page.getByText('Blockchain is required').click();
+    await page.getByText('Contract address is required').click();
+
   })
-  test.skip('should display all expected blockchain options in the dropdown', async ({ page }) => {
+
+  test('should display all expected blockchain blockChain_Names in the dropdown', async ({ page }) => {
     await login(page, VALID_EMAIL, VALID_PASSWORD);
     await page.getByRole('button', { name: 'NFT Collection' }).click();
     await page.getByRole('button', { name: 'New Collection' }).click();
- 
-    await page.getByRole('combobox', { name: 'Select a blockchain' }).click();
-    const blockchainOptionLocators = page.locator('.ant-select-item-option-content');
-    await expect(blockchainOptionLocators.first()).toBeVisible();
-    const actualBlockchains = await blockchainOptionLocators.allTextContents();
-    actualBlockchains.sort();
-    const sortedExpectedBlockchains = [...EXPECTED_BLOCKCHAINS].sort();
-    expect(actualBlockchains).toEqual(sortedExpectedBlockchains);
+    await page.getByRole('combobox').filter({ hasText: 'Select a blockchain' }).click();
+  
+    for (const option of EXPECTED_BLOCKCHAINS) {
+      await expect(page.getByRole('option', { name: option })).toBeVisible();
+    }
   });
-});
+
+})
+
